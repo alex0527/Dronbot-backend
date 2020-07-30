@@ -139,9 +139,9 @@ public class GoogMatrixRequest {
 	 * @throws InterruptedException
 	 * @throws IOException
 	 */
-	public static double[] getNewLocation(String stationAddr, String receiverAddr, double ratio)
+	public static LatLng getNewLocation(String stationAddr, String receiverAddr, double ratio)
 			throws ApiException, InterruptedException, IOException {
-		double[] newLatLng = new double[2];
+		LatLng newLatLng = null;
 		GeocodingResult[] resultOrigin = GeocodingApi.geocode(distCalcer, stationAddr).await();
 		GeocodingResult[] resultDestination = GeocodingApi.geocode(distCalcer, receiverAddr).await();
 		double lat1 = resultOrigin[0].geometry.location.lat;
@@ -162,8 +162,8 @@ public class GoogMatrixRequest {
 
 		double curr_lat = lat1 + Radians(dy / R);
 		double curr_log = lng1 + Radians(dx / R) / Math.cos(Radians(lat1));
-		newLatLng[0] = curr_lat;
-		newLatLng[1] = curr_log;
+		newLatLng.lat = curr_lat;
+		newLatLng.lng = curr_log;
 		// convert lat/lng to formatted address, don't need for now
 		// String currAddress = GeocodingApi.reverseGeocode(distCalcer, new
 		// LatLng(curr_lat, curr_log)).await()[0].formattedAddress;
