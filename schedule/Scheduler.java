@@ -62,11 +62,11 @@ public class Scheduler {
 		int n = orders.size();
 		
 		// case 2: the number of valid orders is not enough to run Knapsack algorithm
-		if (n < 5 && carrier.equals("drone") || n < 8 && carrier.equals("robot")) {
+		if (n < 3 && carrier.equals("drone") || n < 5 && carrier.equals("robot")) {
 			// find out all orders with a appointment time within 12 min of the current time
 			// (12 - 8 = 4)
 			System.out.println("The number of apporiate orders is not enough to run Knapsack algo");
-			System.out.println("The number of apporiate orders is " + n + ", which is less than the minimum number requirement: " + (carrier.equals("drone") ? 5 : 8));
+			System.out.println("The number of apporiate orders is " + n + ", which is less than the minimum number requirement: " + (carrier.equals("drone") ? 3 : 5));
 			List<Order> urgentOrders = new ArrayList<>();
 			DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 			Date cT = new Date();
@@ -676,8 +676,9 @@ public class Scheduler {
 //		System.out.println(java.time.LocalDateTime.now()); 
 //		System.out.println("main thread is done");
 //		MySQLConnection connection = new MySQLConnection();
-//		List<Order> orders = connection.getStastionOrderList(1, "drone");
+//		int machineId = connection.getMachineIdInOrder("3IRH4UCY");
+//		connection.flipMachineAvailability(machineId);
 //		connection.close();
-//		System.out.println(orders.size());
+//		System.out.println(machineId);
 //	}
 }
