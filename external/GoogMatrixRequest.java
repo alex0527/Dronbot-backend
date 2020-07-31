@@ -221,6 +221,7 @@ public class GoogMatrixRequest {
 	  
 	  boolean mode = true; // true as drone; false as robot
 	  double[][] result = new double[6][2]; //空出
+	  /* case 1. weight > 20,  //neither, warning weight, no need to check dimension, no need to check fragile.*/
 	  if (weight > 20) {
 		  //neither, warning weight, no need to check dimension, no need to check fragile.
 		  return result;
@@ -228,12 +229,12 @@ public class GoogMatrixRequest {
 	  /* case 2. 0 < weight <= 5, drone or robot, 
 		 then, 1) dimension max > 25.00, neither, warning dimension, no need to check fragile
 		  	   2) dimension 13 < max <= 25, only robot, no need to check fragile
-		  	 	   			recommend robot: option a. fastest <=30 mins, shipping cost + $10;  option b.  <= 1 hour, shipping cost, option c. cheapest <=2 hours, shipping cost - 5
+		  	 	   			recommend robot: option a. fastest <=30 mins, shipping cost * 1.2;  option b.  <= 1 hour, shipping cost * 1.1, option c. cheapest <=2 hours, shipping cost
 		  	 	   		    //speed not change, priority change.
 		  	   2) dimension max <= 13, drone or robot, check fragile // for testing
-		  	 	   			(1) fragile: recommend robot: option a. fastest <=30 mins, shipping cost + $10;  option b. <= 1 hour, shipping cost c. cheapest <=2 hours, shipping cost - 5
-		  	 	   			(2) not fragile: recommend drone or robot: option a. drone fastest <=30 mins, shipping cost + $5;  option b. drone <= 1 hour, shipping cost; option  c. cheapest <=2 hours, shipping cost - 5
-		  	 	   																d. robot <=30 mins, shipping cost + $5;  option e. robot <= 1 hour, shipping cost; 	f. robot cheapest <=2 hours, shipping cost - 5	
+		  	 	   			(1) fragile: recommend robot: option a. fastest <=30 mins, shipping cost * 1.2;  option b. <= 1 hour, shipping cost * 1.1 c. cheapest <=2 hours, shipping cost
+		  	 	   			(2) not fragile: recommend drone or robot: option a. drone fastest <=30 mins, shipping cost * 1.2;  option b. drone <= 1 hour, shipping cost * 1.1; option  c. cheapest <=2 hours, shipping cost
+		  	 	   																d. robot <=30 mins, shipping cost * 1.2;  option e. robot <= 1 hour, shipping cost * 1.1; 	f. robot cheapest <=2 hours, shipping cost
 		  		 * 
 		  		 */
 	  else if (weight > 0 && weight <= 5) {
@@ -242,7 +243,7 @@ public class GoogMatrixRequest {
 			  return result;
 			  
 		  } else if (max > 13 && max <= 25) {
-		      //mode = false;
+		      mode = false;
 			  double robotDistance = getBicyclingDistance(stationAddr, receiverAddr);
 			  // 30 mins sends
 				result[0][0] = robotDistance / 10; //? time return
@@ -260,7 +261,7 @@ public class GoogMatrixRequest {
 		  } else {
 			// method 1 drone
 			  if (fragile) {
-				  // mode = false
+				  // mode = false;
 				  double robotDistance = getBicyclingDistance(stationAddr, receiverAddr);
 				  // 30 mins sends
 					result[0][0] = robotDistance / 10; //? time return
@@ -317,10 +318,10 @@ public class GoogMatrixRequest {
 	  }
 
 		 /* case 3. 
-		   * 5 < weight <= 25, only robot.
+		   * 5 < weight <= 20, only robot.
 		   * then, 1) dimension max > 25.00, warning dimension is to large. should not exceed 25.00. personalized suggestion. 
-		   * 	   2) dimension max <= 25, robot, fragile or not 都是: recommend robot, option a. fastest <=30 mins, shipping cost + $10;  option b.  <= 1 hour, shipping cost
-		   * 											c. cheapest <= 2 hours, shipping cost - 5
+		   * 	   2) dimension max <= 25, robot, fragile or not 都是: recommend robot, option a. fastest <=30 mins, shipping cost * 1.2;  option b.  <= 1 hour, shipping cost * 1.1
+		   * 											c. cheapest <= 2 hours, shipping cost 
 		   */
 	  else {
 		  

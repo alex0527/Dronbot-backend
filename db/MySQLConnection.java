@@ -275,7 +275,8 @@ public class MySQLConnection {
 					+ "WHERE u.user_id = ? "
 					+ 	"AND u.user_id = o.user_id "
 					+	"AND o.recipient_id = c.contact_id "
-					+ 	"AND o.tracking_id = t.tracking_id";
+					+ 	"AND o.tracking_id = t.tracking_id "
+					+ 	"ORDER BY created_at";
 			PreparedStatement statement = conn.prepareStatement(sql);
 			statement.setString(1, user_id);
 			ResultSet rs = statement.executeQuery();
