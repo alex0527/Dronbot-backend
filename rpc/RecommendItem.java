@@ -135,8 +135,9 @@ public class RecommendItem extends HttpServlet {
 				  array.put(new JSONObject().put("dispatch within: ", "30 mins").put("carrier", "robot").put("price", String.format("%.1f", result[0][1])));
 					array.put(new JSONObject().put("dispatch within: ", "1 hour").put("carrier", "robot").put("price", String.format("%.1f", result[1][1])));
 					array.put(new JSONObject().put("dispatch within: ", "2 hours").put("carrier", "robot").put("price", String.format("%.1f", result[2][1])));
-			  } else {
-					// method 1 drone
+			  } 
+		  else {
+					// method 1 robot
 				  if (fragile) {
 					  array.put(new JSONObject().put("dispatch within: ", "30 mins").put("carrier", "robot").put("price", String.format("%.1f", result[0][1])));
 						array.put(new JSONObject().put("dispatch within: ", "1 hour").put("carrier", "robot").put("price", String.format("%.1f", result[1][1])));
@@ -149,9 +150,21 @@ public class RecommendItem extends HttpServlet {
 						array.put(new JSONObject().put("dispatch within: ", "1 hour").put("carrier", "robot").put("price", String.format("%.1f", result[4][1])));
 						array.put(new JSONObject().put("dispatch within: ", "2 hours").put("carrier", "robot").put("price", String.format("%.1f", result[5][1])));
 				  }
-			  }
-		 
 		  }
+		  }
+		 // 5 < weight <= 20
+		  else {
+			  if (max > 25.00) {
+				  // neither, warning dimension, no need to check fragile
+				  array.put(new JSONObject().put("Deliverable", "No"));
+			  } else if (max <= 25.00) {
+				  array.put(new JSONObject().put("dispatch within: ", "30 mins").put("carrier", "robot").put("price", String.format("%.1f", result[0][1])));
+					array.put(new JSONObject().put("dispatch within: ", "1 hour").put("carrier", "robot").put("price", String.format("%.1f", result[1][1])));
+					array.put(new JSONObject().put("dispatch within: ", "2 hours").put("carrier", "robot").put("price", String.format("%.1f", result[2][1])));
+			  }
+		  }
+		 
+		  
 		
 		RpcHelper.writeJsonArray(response, array); //统一
 	}
