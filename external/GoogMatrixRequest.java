@@ -139,38 +139,25 @@ public class GoogMatrixRequest {
 	 * @throws InterruptedException
 	 * @throws IOException
 	 */
-	public static LatLng getNewLocation(String stationAddr, String receiverAddr, double ratio)
+
+	public static LatLng getNewLocation(String stationAddr, String receiverAddr, double m, double n)
 			throws ApiException, InterruptedException, IOException {
-		LatLng newLatLng = null;
+		LatLng newLatLng = new LatLng();
 		GeocodingResult[] resultOrigin = GeocodingApi.geocode(distCalcer, stationAddr).await();
 		GeocodingResult[] resultDestination = GeocodingApi.geocode(distCalcer, receiverAddr).await();
 		double lat1 = resultOrigin[0].geometry.location.lat;
 		double lng1 = resultOrigin[0].geometry.location.lng;
 		double lat2 = resultDestination[0].geometry.location.lat;
 		double lng2 = resultDestination[0].geometry.location.lng;
-		double dlng = Radians(lng2 - lng1);
-		double dlat = Radians(lat2 - lat1);
-
-		double a = (Math.sin(dlat / 2) * Math.sin(dlat / 2))
-				+ Math.cos(Radians(lat1)) * Math.cos(Radians(lat2)) * (Math.sin(dlng / 2) * Math.sin(dlng / 2));
-		double angle = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-		// distance in km
-		double wholeDistance = R * angle;
-
-		double dx = ratio * wholeDistance * Math.sin(angle);
-		double dy = ratio * wholeDistance * Math.cos(angle);
-
-		double curr_lat = lat1 + Radians(dy / R);
-		double curr_log = lng1 + Radians(dx / R) / Math.cos(Radians(lat1));
+		
+		double curr_lat = ((n * lat1) + (m * lat2)) / (m + n); 
+		double curr_log = ((n * lng1) + (m * lng2)) / (m + n); 
+		
 		newLatLng.lat = curr_lat;
 		newLatLng.lng = curr_log;
-		// convert lat/lng to formatted address, don't need for now
-		// String currAddress = GeocodingApi.reverseGeocode(distCalcer, new
-		// LatLng(curr_lat, curr_log)).await()[0].formattedAddress;
-
+	
 		return newLatLng;
 	}
-
 	/**
 	 * Interpolate the route points between sender and receiver location using Road Api. 
 	 * The performance is acceptable when the distance of points in the path is less than 300m so we don't use it here.  
@@ -234,7 +221,6 @@ public class GoogMatrixRequest {
 	  
 	  boolean mode = true; // true as drone; false as robot
 	  double[][] result = new double[6][2]; //空出
-	  /* case 1. weight > 20,  //neither, warning weight, no need to check dimension, no need to check fragile.*/
 	  if (weight > 20) {
 		  //neither, warning weight, no need to check dimension, no need to check fragile.
 		  return result;
@@ -242,12 +228,12 @@ public class GoogMatrixRequest {
 	  /* case 2. 0 < weight <= 5, drone or robot, 
 		 then, 1) dimension max > 25.00, neither, warning dimension, no need to check fragile
 		  	   2) dimension 13 < max <= 25, only robot, no need to check fragile
-		  	 	   			recommend robot: option a. fastest <=30 mins, shipping cost * 1.2;  option b.  <= 1 hour, shipping cost * 1.1, option c. cheapest <=2 hours, shipping cost
+		  	 	   			recommend robot: option a. fastest <=30 mins, shipping cost + $10;  option b.  <= 1 hour, shipping cost, option c. cheapest <=2 hours, shipping cost - 5
 		  	 	   		    //speed not change, priority change.
 		  	   2) dimension max <= 13, drone or robot, check fragile // for testing
-		  	 	   			(1) fragile: recommend robot: option a. fastest <=30 mins, shipping cost * 1.2;  option b. <= 1 hour, shipping cost * 1.1 c. cheapest <=2 hours, shipping cost
-		  	 	   			(2) not fragile: recommend drone or robot: option a. drone fastest <=30 mins, shipping cost * 1.2;  option b. drone <= 1 hour, shipping cost * 1.1; option  c. cheapest <=2 hours, shipping cost
-		  	 	   																d. robot <=30 mins, shipping cost * 1.2;  option e. robot <= 1 hour, shipping cost * 1.1; 	f. robot cheapest <=2 hours, shipping cost
+		  	 	   			(1) fragile: recommend robot: option a. fastest <=30 mins, shipping cost + $10;  option b. <= 1 hour, shipping cost c. cheapest <=2 hours, shipping cost - 5
+		  	 	   			(2) not fragile: recommend drone or robot: option a. drone fastest <=30 mins, shipping cost + $5;  option b. drone <= 1 hour, shipping cost; option  c. cheapest <=2 hours, shipping cost - 5
+		  	 	   																d. robot <=30 mins, shipping cost + $5;  option e. robot <= 1 hour, shipping cost; 	f. robot cheapest <=2 hours, shipping cost - 5	
 		  		 * 
 		  		 */
 	  else if (weight > 0 && weight <= 5) {
@@ -256,7 +242,7 @@ public class GoogMatrixRequest {
 			  return result;
 			  
 		  } else if (max > 13 && max <= 25) {
-		      mode = false;
+		      //mode = false;
 			  double robotDistance = getBicyclingDistance(stationAddr, receiverAddr);
 			  // 30 mins sends
 				result[0][0] = robotDistance / 10; //? time return
@@ -274,7 +260,7 @@ public class GoogMatrixRequest {
 		  } else {
 			// method 1 drone
 			  if (fragile) {
-				  //mode = false;
+				  // mode = false
 				  double robotDistance = getBicyclingDistance(stationAddr, receiverAddr);
 				  // 30 mins sends
 					result[0][0] = robotDistance / 10; //? time return
@@ -331,10 +317,10 @@ public class GoogMatrixRequest {
 	  }
 
 		 /* case 3. 
-		   * 5 < weight <= 20, only robot.
+		   * 5 < weight <= 25, only robot.
 		   * then, 1) dimension max > 25.00, warning dimension is to large. should not exceed 25.00. personalized suggestion. 
-		   * 	   2) dimension max <= 25, robot, fragile or not 都是: recommend robot, option a. fastest <=30 mins, shipping cost * 1.2;  option b.  <= 1 hour, shipping cost * 1.1
-		   * 											c. cheapest <= 2 hours, shipping cost 
+		   * 	   2) dimension max <= 25, robot, fragile or not 都是: recommend robot, option a. fastest <=30 mins, shipping cost + $10;  option b.  <= 1 hour, shipping cost
+		   * 											c. cheapest <= 2 hours, shipping cost - 5
 		   */
 	  else {
 		  
