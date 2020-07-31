@@ -275,8 +275,7 @@ public class MySQLConnection {
 					+ "WHERE u.user_id = ? "
 					+ 	"AND u.user_id = o.user_id "
 					+	"AND o.recipient_id = c.contact_id "
-					+ 	"AND o.tracking_id = t.tracking_id "
-					+ 	"ORDER BY created_at";
+					+ 	"AND o.tracking_id = t.tracking_id";
 			PreparedStatement statement = conn.prepareStatement(sql);
 			statement.setString(1, user_id);
 			ResultSet rs = statement.executeQuery();
@@ -641,6 +640,66 @@ public class MySQLConnection {
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
+	}
+	
+	public String getRecipientIdInOrder(String orderId) {
+		if (conn == null) {
+			System.err.println("DB connection failed");
+			return "";
+		}
+		String recipientId = "";
+		try {
+			String sql = "SELECT recipient_id FROM dispatch.orders WHERE order_id = ?";
+			PreparedStatement statement = conn.prepareStatement(sql);
+			statement.setString(1, orderId);
+			ResultSet rs = statement.executeQuery();
+			if (rs.next()) {
+				recipientId = rs.getString("recipient_id");
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return recipientId;
+	}
+	
+	public String getRecipientAddress(String recipientId) {
+		if (conn == null) {
+			System.err.println("DB connection failed");
+			return "";
+		}
+		String address = "";
+		try {
+			String sql = "SELECT address FROM dispatch.contact WHERE contact_id = ?";
+			PreparedStatement statement = conn.prepareStatement(sql);
+			statement.setString(1, recipientId);
+			ResultSet rs = statement.executeQuery();
+			if (rs.next()) {
+				address = rs.getString("address");
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return address;
+	}
+	
+	public String getMachineType(String orderId) {
+		if (conn == null) {
+			System.err.println("DB connection failed");
+			return "";
+		}
+		String machineType = "";
+		try {
+			String sql = "SELECT carrier FROM dispatch.orders WHERE order_id = ?";
+			PreparedStatement statement = conn.prepareStatement(sql);
+			statement.setString(1, orderId);
+			ResultSet rs = statement.executeQuery();
+			if (rs.next()) {
+				machineType = rs.getString("carrier");
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return machineType;
 	}
 	
 	/**
