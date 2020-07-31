@@ -141,7 +141,7 @@ public class GoogMatrixRequest {
 	 */
 	public static LatLng getNewLocation(String stationAddr, String receiverAddr, double ratio)
 			throws ApiException, InterruptedException, IOException {
-		LatLng newLatLng = null;
+		LatLng newLatLng = new LatLng();
 		GeocodingResult[] resultOrigin = GeocodingApi.geocode(distCalcer, stationAddr).await();
 		GeocodingResult[] resultDestination = GeocodingApi.geocode(distCalcer, receiverAddr).await();
 		double lat1 = resultOrigin[0].geometry.location.lat;
