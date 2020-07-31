@@ -47,32 +47,29 @@ public class Tracking extends HttpServlet {
 
 		MySQLConnection connection = new MySQLConnection();
 		String orderId = connection.getOrderId(trackingId);
-
+		String machineType = connection.getMachineType(orderId);
+		String recipientId = connection.getRecipientIdInOrder(orderId);
+		String receiverAddr = connection.getRecipientAddress(recipientId);
 		TrackingInfo trackingInfo = connection.getTrackingInfo(trackingId);
-		List<String> orderDetails = connection.getDetail(orderId);
-
+		connection.close();
+		
 		String deliverStatus = "";
 		String deliveredTime = "";
 		String transitTime = "";
 		String senderAddr = "";
-		String receiverAddr = "";
 		boolean delay = false;
-		String machineType = "";
+		
 		
 //		LatLng senderLatLng = null;
 		LatLng receiverLatLng = null;
 		LatLng currLocation = null;
 
-		if (trackingInfo != null && orderDetails != null) {
-			
+		if (trackingInfo != null) {
 			deliverStatus = trackingInfo.getStatus();
 			delay = trackingInfo.isDelay();
 			deliveredTime = trackingInfo.getDeliveredAt();
 			transitTime = trackingInfo.getTransitStart();
 			senderAddr = trackingInfo.getDestination();
-
-			receiverAddr = orderDetails.get(8);
-			machineType = orderDetails.get(1);
 		}
 
 //		try {
@@ -89,6 +86,7 @@ public class Tracking extends HttpServlet {
 
 		DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		String currentTime = df.format(new Date());
+		System.out.println(currentTime);
 		
 		try {
 			double distRatio;
@@ -97,10 +95,10 @@ public class Tracking extends HttpServlet {
 				long start = df.parse(transitTime).getTime();
 				long dest = df.parse(deliveredTime).getTime();
 				if (curr >= start && curr <= dest) {
-					distRatio = (float) (curr - start) / (float) (dest - start);
+					distRatio = ((double) (curr - start)) / ((double) (dest - start));
 					System.out.println(distRatio);
 					if (machineType.equals("drone")) {
-						currLocation = GoogMatrixRequest.getNewLocation(senderAddr, receiverAddr, distRatio);
+						currLocation = GoogMatrixRequest.getNewLocation(senderAddr, receiverAddr, distRatio, 1.0 - distRatio);
 					} else {
 						try {
 							List<LatLng> points = GoogMatrixRequest.getDirectionPoints(senderAddr, receiverAddr);
@@ -122,8 +120,6 @@ public class Tracking extends HttpServlet {
 			obj.put("current location", currLocation);
 		}
 		
-		
-		connection.close();
 		RpcHelper.writeJsonObject(response, obj);
 	}
 
