@@ -643,6 +643,66 @@ public class MySQLConnection {
 		}
 	}
 	
+	public String getRecipientIdInOrder(String orderId) {
+		if (conn == null) {
+			System.err.println("DB connection failed");
+			return "";
+		}
+		String recipientId = "";
+		try {
+			String sql = "SELECT recipient_id FROM dispatch.orders WHERE order_id = ?";
+			PreparedStatement statement = conn.prepareStatement(sql);
+			statement.setString(1, orderId);
+			ResultSet rs = statement.executeQuery();
+			if (rs.next()) {
+				recipientId = rs.getString("recipient_id");
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return recipientId;
+	}
+	
+	public String getRecipientAddress(String recipientId) {
+		if (conn == null) {
+			System.err.println("DB connection failed");
+			return "";
+		}
+		String address = "";
+		try {
+			String sql = "SELECT address FROM dispatch.contact WHERE contact_id = ?";
+			PreparedStatement statement = conn.prepareStatement(sql);
+			statement.setString(1, recipientId);
+			ResultSet rs = statement.executeQuery();
+			if (rs.next()) {
+				address = rs.getString("address");
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return address;
+	}
+	
+	public String getMachineType(String orderId) {
+		if (conn == null) {
+			System.err.println("DB connection failed");
+			return "";
+		}
+		String machineType = "";
+		try {
+			String sql = "SELECT carrier FROM dispatch.orders WHERE order_id = ?";
+			PreparedStatement statement = conn.prepareStatement(sql);
+			statement.setString(1, orderId);
+			ResultSet rs = statement.executeQuery();
+			if (rs.next()) {
+				machineType = rs.getString("carrier");
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return machineType;
+	}
+	
 	/**
 	 * Store the latest update time into the tacking table 
 	 * @param trackingId

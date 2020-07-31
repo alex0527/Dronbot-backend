@@ -139,7 +139,8 @@ public class GoogMatrixRequest {
 	 * @throws InterruptedException
 	 * @throws IOException
 	 */
-	public static LatLng getNewLocation(String stationAddr, String receiverAddr, double ratio)
+
+	public static LatLng getNewLocation(String stationAddr, String receiverAddr, double m, double n)
 			throws ApiException, InterruptedException, IOException {
 		LatLng newLatLng = new LatLng();
 		GeocodingResult[] resultOrigin = GeocodingApi.geocode(distCalcer, stationAddr).await();
@@ -148,29 +149,15 @@ public class GoogMatrixRequest {
 		double lng1 = resultOrigin[0].geometry.location.lng;
 		double lat2 = resultDestination[0].geometry.location.lat;
 		double lng2 = resultDestination[0].geometry.location.lng;
-		double dlng = Radians(lng2 - lng1);
-		double dlat = Radians(lat2 - lat1);
-
-		double a = (Math.sin(dlat / 2) * Math.sin(dlat / 2))
-				+ Math.cos(Radians(lat1)) * Math.cos(Radians(lat2)) * (Math.sin(dlng / 2) * Math.sin(dlng / 2));
-		double angle = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-		// distance in km
-		double wholeDistance = R * angle;
-
-		double dx = ratio * wholeDistance * Math.sin(angle);
-		double dy = ratio * wholeDistance * Math.cos(angle);
-
-		double curr_lat = lat1 + Radians(dy / R);
-		double curr_log = lng1 + Radians(dx / R) / Math.cos(Radians(lat1));
+		
+		double curr_lat = ((n * lat1) + (m * lat2)) / (m + n); 
+		double curr_log = ((n * lng1) + (m * lng2)) / (m + n); 
+		
 		newLatLng.lat = curr_lat;
 		newLatLng.lng = curr_log;
-		// convert lat/lng to formatted address, don't need for now
-		// String currAddress = GeocodingApi.reverseGeocode(distCalcer, new
-		// LatLng(curr_lat, curr_log)).await()[0].formattedAddress;
-
+	
 		return newLatLng;
 	}
-
 	/**
 	 * Interpolate the route points between sender and receiver location using Road Api. 
 	 * The performance is acceptable when the distance of points in the path is less than 300m so we don't use it here.  
@@ -274,7 +261,7 @@ public class GoogMatrixRequest {
 		  } else {
 			// method 1 drone
 			  if (fragile) {
-				  //mode = false;
+				  // mode = false;
 				  double robotDistance = getBicyclingDistance(stationAddr, receiverAddr);
 				  // 30 mins sends
 					result[0][0] = robotDistance / 10; //? time return
